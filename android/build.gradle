@@ -1,6 +1,5 @@
 group 'com.example.iflyplugin'
 version '1.0'
-
 buildscript {
     repositories {
         google()
@@ -11,16 +10,13 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.5.0'
     }
 }
-
 rootProject.allprojects {
     repositories {
         google()
         jcenter()
     }
 }
-
 apply plugin: 'com.android.library'
-
 android {
     compileSdkVersion 28
 
@@ -30,4 +26,8 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+}
+
+dependencies {
+    implementation files('libs/Msc.jar')
 }
