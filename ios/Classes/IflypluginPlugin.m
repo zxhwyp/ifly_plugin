@@ -14,7 +14,7 @@
 
 - (instancetype)init {
     if (self = [super init]) {
-        NSString *initString = [[NSString alloc] initWithFormat:@"appid=%@", @"5f2b618a"];
+        NSString *initString = [[NSString alloc] initWithFormat:@"appid=%@", @"5f3dca21"];
         [IFlySpeechUtility createUtility:initString];
         _iFlySpeechRecognizer = [IFlySpeechRecognizer sharedInstance];
         _iFlySpeechRecognizer.delegate = self;

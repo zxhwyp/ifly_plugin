@@ -53,7 +53,7 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void initIfly(Context context) {
-    SpeechUtility.createUtility(context, SpeechConstant.APPID +"=5f2b618a");
+    SpeechUtility.createUtility(context, SpeechConstant.APPID +"=5f3dca21");
 
     recognizer = SpeechRecognizer.createRecognizer(context, mInitListener);
     recognizer.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
