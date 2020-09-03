@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
 
   void start() async {
     var uuid = Uuid();
-    Directory appDocDir = await getExternalStorageDirectory();
+    Directory appDocDir = await getApplicationDocumentsDirectory();
     String path = appDocDir.path + '/' + uuid.v4();
     _recorder = FlutterAudioRecorder(path, audioFormat: AudioFormat.WAV);
     await _recorder.initialized;

@@ -57,13 +57,12 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
 
     recognizer = SpeechRecognizer.createRecognizer(context, mInitListener);
     recognizer.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
-    recognizer.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
     recognizer.setParameter( SpeechConstant.RESULT_TYPE, "json" );
     //设置语音输入语言，zh_cn为简体中文
     recognizer.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
+    recognizer.setParameter(SpeechConstant.DOMAIN, "iat");
     recognizer.setParameter(SpeechConstant.SAMPLE_RATE,"16000");
     recognizer.setParameter(SpeechConstant.ASR_PTT, "1");
-    recognizer.setParameter(SpeechConstant.DOMAIN, "iat");
   }
 
   public static void registerWith(Registrar registrar) {
@@ -86,7 +85,7 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
   private void recognizer(String path) {
     recognizer.startListening(mRecognizerListener);
     FileInputStream fis = null;
-    final byte[] buffer = new byte[64*1024];
+    final byte[] buffer = new byte[5*1024*1024];
     try {
       fis = new FileInputStream(new File(path));
       if (0 == fis.available()) {
