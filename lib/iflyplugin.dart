@@ -8,4 +8,9 @@ class Iflyplugin {
   static Future<void> recognizer(String file) async {
     return await channel.invokeMethod('recognizer', file);
   }
+
+  static Future<void> result(
+      Future<dynamic> Function(MethodCall) handler) async {
+    return channel.setMethodCallHandler(handler);
+  }
 }

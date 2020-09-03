@@ -2,13 +2,7 @@ package com.example.iflyplugin;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.widget.EditText;
-
 import androidx.annotation.NonNull;
-
-
 import com.iflytek.cloud.InitListener;
 import com.iflytek.cloud.RecognizerListener;
 import com.iflytek.cloud.RecognizerResult;
@@ -17,12 +11,19 @@ import com.iflytek.cloud.SpeechError;
 import com.iflytek.cloud.SpeechRecognizer;
 import com.iflytek.cloud.SpeechUtility;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -39,9 +40,10 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
 
-  StringBuilder mResult = null;
-
   private SpeechRecognizer recognizer;
+
+  // 用HashMap存储听写结果
+  private HashMap<String, String> mIatResults = new LinkedHashMap<String, String>();
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -51,22 +53,17 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void initIfly(Context context) {
-    SpeechUtility.createUtility(context, SpeechConstant.APPID +"=5f3dca21");
+    SpeechUtility.createUtility(context, SpeechConstant.APPID +"=5f2b618a");
 
-    recognizer = SpeechRecognizer.getRecognizer();
+    recognizer = SpeechRecognizer.createRecognizer(context, mInitListener);
     recognizer.setParameter(SpeechConstant.AUDIO_SOURCE, "-1");
     recognizer.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_CLOUD);
     recognizer.setParameter( SpeechConstant.RESULT_TYPE, "json" );
-    //设置语法ID和 SUBJECT 为空，以免因之前有语法调用而设置了此参数；或直接清空所有参数，具体可参考 DEMO 的示例。
-    recognizer.setParameter( SpeechConstant.CLOUD_GRAMMAR, null );
-    recognizer.setParameter( SpeechConstant.SUBJECT, null );
-    //设置返回结果格式，目前支持json,xml以及plain 三种格式，其中plain为纯听写文本内容
-    recognizer.setParameter(SpeechConstant.RESULT_TYPE, "json");
     //设置语音输入语言，zh_cn为简体中文
     recognizer.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
-    //设置标点符号,设置为"0"返回结果无标点,设置为"1"返回结果有标点
-    recognizer.setParameter(SpeechConstant.ASR_PTT,"1");
     recognizer.setParameter(SpeechConstant.SAMPLE_RATE,"16000");
+    recognizer.setParameter(SpeechConstant.ASR_PTT, "1");
+    recognizer.setParameter(SpeechConstant.DOMAIN, "iat");
   }
 
   public static void registerWith(Registrar registrar) {
@@ -93,7 +90,6 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
     try {
       fis = new FileInputStream(new File(path));
       if (0 == fis.available()) {
-        mResult.append("no audio avaible!");
         recognizer.cancel();
       } else {
         int lenRead = buffer.length;
@@ -133,14 +129,24 @@ public class IflypluginPlugin implements FlutterPlugin, MethodCallHandler {
 
     @Override
     public void onResult(final RecognizerResult result, boolean isLast) {
-      if (null != result) {
-        String text ;
-        text = JsonParser.parseLocalGrammarResult(result.getResultString());
-        mResult = new StringBuilder(text);
-      } else {
-        mResult = new StringBuilder("");
+
+      String text = JsonParser.parseIatResult(result.getResultString());
+
+      String sn = null;
+      // 读取json结果中的sn字段
+      try {
+        JSONObject resultJson = new JSONObject(result.getResultString());
+        sn = resultJson.optString("sn");
+      } catch (JSONException e) {
+        e.printStackTrace();
       }
-      channel.invokeMethod("result", mResult.toString());
+      mIatResults.put(sn, text);
+
+      StringBuffer resultBuffer = new StringBuffer();
+      for (String key : mIatResults.keySet()) {
+        resultBuffer.append(mIatResults.get(key));
+      }
+      channel.invokeMethod("result", resultBuffer.toString());
     }
 
     @Override

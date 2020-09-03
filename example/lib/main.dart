@@ -1,9 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
 import 'package:iflyplugin/iflyplugin.dart';
 import 'package:flutter_audio_recorder/flutter_audio_recorder.dart';
 import 'package:path_provider/path_provider.dart';
@@ -61,7 +58,7 @@ class _MyAppState extends State<MyApp> {
 
   void start() async {
     var uuid = Uuid();
-    Directory appDocDir = await getApplicationDocumentsDirectory();
+    Directory appDocDir = await getExternalStorageDirectory();
     String path = appDocDir.path + '/' + uuid.v4();
     _recorder = FlutterAudioRecorder(path, audioFormat: AudioFormat.WAV);
     await _recorder.initialized;
